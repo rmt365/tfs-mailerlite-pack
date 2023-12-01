@@ -1,75 +1,24 @@
 import * as coda from "@codahq/packs-sdk";
+import { CampaignSchema } from "./schemas";
+import { SubscribersSchema } from "./schemas";
+import { GroupsSchema } from "./schemas";
+import { StatsSchema } from "./schemas";
 
 export const pack = coda.newPack();
 
-pack.addNetworkDomain("api.mailerlite.com");
+pack.addNetworkDomain("connect.mailerlite.com");
 
+const API_BASE_URL = "https://connect.mailerlite.com/api/"
+
+// pack.setUserAuthentication({
+//   type: coda.AuthenticationType.CustomHeaderToken,
+//   instructionsUrl: "https://developers.mailerlite.com/docs/authentication",
+//   headerName: 'X-MailerLite-ApiKey',
+// });
 pack.setUserAuthentication({
-  type: coda.AuthenticationType.CustomHeaderToken,
+  type: coda.AuthenticationType.HeaderBearerToken,
   instructionsUrl: "https://developers.mailerlite.com/docs/authentication",
-  headerName: 'X-MailerLite-ApiKey',
-
-
-});
-
-const CampaignSchema = coda.makeObjectSchema({
-  
-  properties: {
-    name: {
-      description: "Name",
-      type: coda.ValueType.String,
-      required: true,
-    },
-    date_send: {
-      description: "date_send",
-      type: coda.ValueType.String,
-      required: true,
-    },
-
-    subject: {
-      description: "Subject",
-      type: coda.ValueType.String,
-    },
-
-    status: {
-      description: "Status",
-      type: coda.ValueType.String,
-    
-    },
-
-    count: {
-      description: "Count",
-      type: coda.ValueType.Number
-    },
-
-    rate: {
-      description: "Open rate",
-      type: coda.ValueType.Number,
-      codaType: coda.ValueHintType.Percent,
-    },
-
-    total_recipients: {
-      description: "Total recipients",
-      type: coda.ValueType.Number,
-      required: true,
-
-    },
-
-    click_rate: {
-      description: "Click rate",
-      type: coda.ValueType.Number,
-      codaType: coda.ValueHintType.Percent,
-      required: true,
-
-    },
-
-
-  },
-  displayProperty: "name",
-  idProperty: "name",
-  featuredProperties: ["name","subject","date_send","status","rate"]
-  ,
-});
+})
 
 pack.addSyncTable({
   name: "Campaigns",
@@ -91,8 +40,8 @@ pack.addSyncTable({
 
     execute: async function ([name,subject,date_send,status,count,rate], context) {
 
-  
-      let url = "https://api.mailerlite.com/api/v2/campaigns";
+      // let url = "https://api.mailerlite.com/api/v2/campaigns";
+      let url = `${API_BASE_URL}campaigns`
       let response = await context.fetcher.fetch({
         method: "GET",
         url: url,
@@ -127,76 +76,6 @@ pack.addSyncTable({
   },
 );
 
-const SubscribersSchema = coda.makeObjectSchema({
-  
-  properties: {
-    name: {
-      description: "Name",
-      type: coda.ValueType.String,
-      required: true,
-    },
-    id: {
-      description: "id",
-      type: coda.ValueType.Number
-    },
-    email: {
-      description: "email",
-      type: coda.ValueType.String,
-      required: true,
-    },
-
-    sent: {
-      description: "sent",
-      type: coda.ValueType.Number,
-    },
-
-    opened: {
-      description: "opened",
-      type: coda.ValueType.Number,
-    
-    },
-
-    opened_rate: {
-      description: "Count",
-      type: coda.ValueType.Number,
-      codaType: coda.ValueHintType.Percent,
-    },
-
-    clicked_rate: {
-      description: "clicked rate",
-      type: coda.ValueType.Number,
-      codaType: coda.ValueHintType.Percent,
-    },
-
-    clicked: {
-      description: "clicked",
-      type: coda.ValueType.Number,
-      required: true,
-
-    },
-
-    type: {
-      description: "type",
-      type: coda.ValueType.String,
-      required: true,
-
-    },
-
-     date_created: {
-      description: "type",
-      type: coda.ValueType.String,
-      codaType: coda.ValueHintType.Date,
-      required: true,
-
-    },
-
-
-  },
-  displayProperty: "email",
-  idProperty: "email",
-  featuredProperties: ["name","email","opened_rate","date_created"]
-  ,
-});
 
 pack.addSyncTable({
   name: "Subscribers",
@@ -219,15 +98,16 @@ pack.addSyncTable({
     execute: async function ([name,email,opened_rate,opened], context) {
 
   
-      let url = "https://api.mailerlite.com/api/v2/subscribers?limit=5000";
+      // let url = "https://api.mailerlite.com/api/v2/subscribers?limit=5000";
+      let url = `${API_BASE_URL}subscribers?limit=5000`
       let response = await context.fetcher.fetch({
         method: "GET",
         url: url,
       });
 
-    
+      console.log(response)
       let results = response.body;
-
+      console.log(results)
 
       return {
         result: results
@@ -239,75 +119,7 @@ pack.addSyncTable({
   },
 );
 
-const GroupsSchema = coda.makeObjectSchema({
-  
-  properties: {
-    name: {
-      description: "Name",
-      type: coda.ValueType.String,
-      required: true,
-    },
-    id: {
-      description: "id",
-      type: coda.ValueType.Number
-    },
-    total: {
-      description: "email",
-      type: coda.ValueType.Number,
-      required: true,
-    },
 
-    active: {
-      description: "sent",
-      type: coda.ValueType.Number,
-    },
-
-    unsubscribed: {
-      description: "opened",
-      type: coda.ValueType.Number,
-    
-    },
-
-    bounced: {
-      description: "Count",
-      type: coda.ValueType.Number,
-    
-    },
-
-    sent: {
-      description: "clicked rate",
-      type: coda.ValueType.Number,
-    },
-
-    opened: {
-      description: "clicked",
-      type: coda.ValueType.Number,
-      required: true,
-
-    },
-
-    clicked: {
-      description: "type",
-      type: coda.ValueType.Number,
-      required: true,
-
-    },
-
-     date_created: {
-      description: "type",
-      type: coda.ValueType.String,
-      codaType: coda.ValueHintType.Date,
-      required: true,
-
-    },
-
-
-  },
-  displayProperty: "name",
-  idProperty: "name",
-  featuredProperties: ["name","id","total","date_created"]
-  ,
-});
 
 pack.addSyncTable({
   name: "Groups",
@@ -330,18 +142,19 @@ pack.addSyncTable({
     execute: async function ([name,id], context) {
 
   
-      let url = "https://api.mailerlite.com/api/v2/groups";
+      // let url = "https://api.mailerlite.com/api/v2/groups";
+      let url = `${API_BASE_URL}groups`
       let response = await context.fetcher.fetch({
         method: "GET",
         url: url,
       });
 
-    
+      console.log(response)
       let results = response.body;
-
+      console.log(results)
 
       return {
-        result: results
+        result: results.data
       }
 
 
@@ -351,64 +164,6 @@ pack.addSyncTable({
 );
   
 //Stats_starts
-const StatsSchema = coda.makeObjectSchema({
-  
-  properties: {
-    subscribed: {
-      description: "Suscribed",
-      type: coda.ValueType.Number,
-      required: true,
-      fromKey: "subscribed"
-    },
-    unsubscribed: {
-      description: "Unsubscribed",
-      type: coda.ValueType.Number,
-      fromKey: "unsubscribed"
-    },
-    campaigns: {
-      description: "Campaigns",
-      type: coda.ValueType.Number,
-      required: true,
-      fromKey: "campaigns"
-    },
-
-    sent_emails: {
-      description: "Sent Emails",
-      type: coda.ValueType.Number,
-      fromKey: "sent_emails"
-    },
-
-    open_rate: {
-      description: "Open Rate",
-      type: coda.ValueType.Number,
-      fromKey: "open_rate",
-      codaType: coda.ValueHintType.Percent,
-    
-    },
-
-    click_rate: {
-      description: "Click Rate",
-      type: coda.ValueType.Number,
-      fromKey: "click_rate",
-      codaType: coda.ValueHintType.Percent,
-      
-    },
-
-    bounce_rate: {
-      description: "Bounce Rate",
-      type: coda.ValueType.Number,
-      fromKey: "bounce_rate",
-      codaType: coda.ValueHintType.Percent,
-      
-    },
-
-
-  },
-  displayProperty: "Subscribed",
-  idProperty: "Campaigns",
-  featuredProperties: ["Subscribed","Unsubscribed","Campaigns"]
-  
-});
 
 pack.addSyncTable({
   name: "Stats",
@@ -429,7 +184,8 @@ pack.addSyncTable({
     ],
     execute: async function ([stats], context) {
 
-      let url = "https://api.mailerlite.com/api/v2/stats";
+      // let url = "https://api.mailerlite.com/api/v2/stats";
+      let url = `${API_BASE_URL}stats`
       let response = await context.fetcher.fetch({
         method: "GET",
         url: url,
@@ -463,7 +219,8 @@ pack.addFormula({
 
   execute: async function ([name,email], context) {
     let response = await context.fetcher.fetch({
-      url: "https://api.mailerlite.com/api/v2/subscribers",
+      // url: "https://api.mailerlite.com/api/v2/subscribers",
+      url: `${API_BASE_URL}subscribers`,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -506,9 +263,10 @@ pack.addFormula({
   isAction: true,
 
   execute: async function ([Group_ID,email,name], context) {
-      console.log("https://api.mailerlite.com/api/v2/groups/"+Group_ID+"/subscribers")
+      // console.log("https://api.mailerlite.com/api/v2/groups/"+Group_ID+"/subscribers")
       let response = await context.fetcher.fetch({
-      url: "https://api.mailerlite.com/api/v2/groups/"+Group_ID+"/subscribers",
+      // url: "https://api.mailerlite.com/api/v2/groups/"+Group_ID+"/subscribers",
+      url: `${API_BASE_URL}groups/${Group_ID}/subscribers`,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
