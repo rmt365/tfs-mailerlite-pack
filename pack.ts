@@ -143,7 +143,6 @@ pack.addSyncTable({
         url: url,
       });
 
-      console.log(response)
       let results = response.body.data;
 
       for (let result of results){
@@ -153,9 +152,6 @@ pack.addSyncTable({
         result.clickRatePct = result.click_rate.string
       }
       
-      console.log(results)
-
-
       return {
         result: results
       }
