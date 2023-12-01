@@ -183,13 +183,11 @@ export const GroupsSchema = coda.makeObjectSchema({
         },
         openRate:{
             description:"Open rate for the group",
-            type:coda.ValueType.Number,
-            fromKey:"open_rate.float"
+            type:coda.ValueType.Number
         },
         openRatePct:{
             description:"Open rate percentage for the group",
-            type:coda.ValueType.String,
-            fromKey:"open_rate.string"
+            type:coda.ValueType.String            
         },
         emailsClicked:{
             description:"Total number of clicks in emails the group",
@@ -198,13 +196,11 @@ export const GroupsSchema = coda.makeObjectSchema({
         },
         clickRate:{
             description:"Click rate for the group",
-            type:coda.ValueType.Number,
-            fromKey:"click_rate.float"
+            type:coda.ValueType.Number
         },
         clickRatePct:{
             description:"Click rate percentage for the group",
-            type:coda.ValueType.String,
-            fromKey:"click_rate.string"
+            type:coda.ValueType.String
         },
         unsubscribed:{
             description:"Total number of subscribers that have unsubscribed from the group",

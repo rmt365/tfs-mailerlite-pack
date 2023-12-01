@@ -150,11 +150,20 @@ pack.addSyncTable({
       });
 
       console.log(response)
-      let results = response.body;
+      let results = response.body.data;
+
+      for (let result of results){
+        result.openRate = result.open_rate.float
+        result.openRatePct = result.open_rate.string
+        result.clickRate = result.click_rate.float
+        result.clickRatePct = result.click_rate.string
+      }
+      
       console.log(results)
 
+
       return {
-        result: results.data
+        result: results
       }
 
 
