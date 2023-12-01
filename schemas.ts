@@ -155,16 +155,17 @@ export const GroupsSchema = coda.makeObjectSchema({
 
     properties:{
         id: {
-            description: "Id",
-            type: coda.ValueType.Number,
+            description: "Mailerlite group id",
+            type: coda.ValueType.String,
             required: true,
             fromKey:"id"
         },
         name: {
-            description: "Name",
+            description: "The name of the group",
             type: coda.ValueType.String,
             required: true,
-            fromKey:"name"
+            fromKey:"name",
+            mutable: true
         },
         active:{
             description:"No of active subscribers in the group",

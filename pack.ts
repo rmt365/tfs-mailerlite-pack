@@ -96,10 +96,7 @@ pack.addSyncTable({
     ],
 
     execute: async function ([name,email,opened_rate,opened], context) {
-
-  
-      // let url = "https://api.mailerlite.com/api/v2/subscribers?limit=5000";
-      let url = `${API_BASE_URL}subscribers?limit=5000`
+      let url = `${API_BASE_URL}subscribers?limit=1000`
       let response = await context.fetcher.fetch({
         method: "GET",
         url: url,
@@ -140,9 +137,6 @@ pack.addSyncTable({
     ],
 
     execute: async function ([name,id], context) {
-
-  
-      // let url = "https://api.mailerlite.com/api/v2/groups";
       let url = `${API_BASE_URL}groups`
       let response = await context.fetcher.fetch({
         method: "GET",
@@ -166,8 +160,32 @@ pack.addSyncTable({
         result: results
       }
 
+    },
+    executeUpdate: async function (args, updates, context) {
+      let update = updates[0];  // Only one row at a time, by default.
+      let {id, name}= update.newValue;
+      // Update the task in Todoist.
+      let response = await context.fetcher.fetch({
+        method: "PUT",
+        url: `${API_BASE_URL}groups/${id}`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({name:name}),
+      });
 
-      },
+      let result = response.body.data;
+
+      result.openRate = result.open_rate.float
+      result.openRatePct = result.open_rate.string
+      result.clickRate = result.click_rate.float
+      result.clickRatePct = result.click_rate.string
+      
+      // Return the results.
+      return {
+        result: [result]
+      };
+    }
     },
   },
 );
