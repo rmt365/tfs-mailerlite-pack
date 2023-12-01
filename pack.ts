@@ -9,7 +9,7 @@ export const pack = coda.newPack();
 
 pack.addNetworkDomain("connect.mailerlite.com");
 
-const API_BASE_URL = "https://connect.mailerlite.com/api/"
+export const API_BASE_URL = "https://connect.mailerlite.com/api/"
 
 // pack.setUserAuthentication({
 //   type: coda.AuthenticationType.CustomHeaderToken,
@@ -21,6 +21,7 @@ pack.setUserAuthentication({
   instructionsUrl: "https://developers.mailerlite.com/docs/authentication",
 })
 
+//Campaigns
 pack.addSyncTable({
   name: "Campaigns",
   schema: CampaignSchema,
@@ -77,7 +78,7 @@ pack.addSyncTable({
   },
 );
 
-
+// Subscribers
 pack.addSyncTable({
   name: "Subscribers",
   schema: SubscribersSchema,
@@ -99,6 +100,8 @@ pack.addSyncTable({
         url: url,
       });
 
+      // TODO : Get a list of groups, each with a list of subscribers
+      // use this list to lookup the groups for a subscriber and add an array of GroupIds to the subscriber
       let results = response.body.data;
       console.log(`results count: ${results.length}`)
       let meta = response.body.meta as Meta
@@ -207,6 +210,7 @@ pack.addSyncTable({
         result.clickRate = result.click_rate.float
         result.clickRatePct = result.click_rate.string
       }
+      }
       
       return {
         result: results
@@ -242,7 +246,6 @@ pack.addSyncTable({
 );
   
 //Stats_starts
-
 pack.addSyncTable({
   name: "Stats",
   schema: StatsSchema,
@@ -275,6 +278,7 @@ pack.addSyncTable({
   },
 );
 //stats_end
+
 pack.addFormula({
   name: "AddSubscriber",
   description: "Add a new subscriber.",
