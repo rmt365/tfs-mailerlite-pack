@@ -124,6 +124,57 @@ pack.addSyncTable({
       }
 
       },
+    executeUpdate:async function(args, updates, context){
+      let update = updates[0];  // Only one row at a time, by default.
+      let {id, email, firstName, lastName}= update.newValue;
+      /**email	string	
+       * fields	object
+       * groups	array
+      */
+      let fields = {}
+      if( update.updatedFields.includes("firstName") || update.updatedFields.includes("name")){fields['name']=firstName}
+      if( update.updatedFields.includes("lastName") || update.updatedFields.includes("last_name")){fields['last_name']=lastName}
+
+      console.log(fields)
+
+      try{
+        let response = await context.fetcher.fetch({
+          method: "PUT",
+          url: `${API_BASE_URL}subscribers/${id}`,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({email, 
+                                fields}),
+        });
+
+        let result = response.body.data;
+
+        result.firstName = result.fields?.name
+        result.lastName = result.fields?.last_name
+        result.opened_rate =  result.opened_rate/100
+        result.clicked_rate = result.clicked_rate/100
+      
+        return{ result:[result]}
+
+      } catch(error){
+          // If the request failed because the server returned a 300+ status code.
+          console.log(error)
+          if (coda.StatusCodeError.isStatusCodeError(error)) {
+            // Cast the error as a StatusCodeError, for better intellisense.
+            let statusError = error as coda.StatusCodeError;
+            // If the API returned an error message in the body, show it to the user.
+            console.log(statusError)
+            let message = statusError.body?.message;
+            if (message) {
+              throw new coda.UserVisibleError(message);
+            }
+          }
+          // The request failed for some other reason. Re-throw the error so that it
+          // bubbles up.
+          throw error;
+      }
+    }
     },
   },
 
@@ -165,7 +216,6 @@ pack.addSyncTable({
     executeUpdate: async function (args, updates, context) {
       let update = updates[0];  // Only one row at a time, by default.
       let {id, name}= update.newValue;
-      // Update the task in Todoist.
       let response = await context.fetcher.fetch({
         method: "PUT",
         url: `${API_BASE_URL}groups/${id}`,

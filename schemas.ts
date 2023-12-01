@@ -207,7 +207,8 @@ export const SubscribersSchema = coda.makeObjectSchema({
         description: "Subscriber email address",
         type: coda.ValueType.String,
         required: true,
-        fromKey:"email"
+        fromKey:"email",
+        mutable:true
       },
       status:{
         description: "Subscriber status",
@@ -216,11 +217,13 @@ export const SubscribersSchema = coda.makeObjectSchema({
       },
       firstName:{
         description:"Subscriber's first name",
-        type: coda.ValueType.String
+        type: coda.ValueType.String,
+        mutable:true
       },
       lastName:{
         description:"Subscriber's first name",
-        type: coda.ValueType.String
+        type: coda.ValueType.String,
+        mutable:true
       },
       sent: {
         description: "sent",
@@ -237,14 +240,14 @@ export const SubscribersSchema = coda.makeObjectSchema({
       opened_rate: {
         description: "Open rate",
         type: coda.ValueType.Number,
-        // codaType: coda.ValueHintType.Percent,
+        codaType: coda.ValueHintType.Percent,
         fromKey:"open_rate"
       },
   
       clicked_rate: {
         description: "clicked rate",
         type: coda.ValueType.Number,
-        // codaType: coda.ValueHintType.Percent,
+        codaType: coda.ValueHintType.Percent,
         fromKey:"click_rate"
       },
   
