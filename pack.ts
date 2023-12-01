@@ -3,6 +3,7 @@ import { CampaignSchema } from "./schemas";
 import { SubscribersSchema } from "./schemas";
 import { GroupsSchema } from "./schemas";
 import { StatsSchema } from "./schemas";
+import { Meta } from "./types";
 
 export const pack = coda.newPack();
 
@@ -84,40 +85,53 @@ pack.addSyncTable({
   formula: {
     name: "Subscribers",
     description: "A list of all subscribers",
-    parameters: [
-      //if I want to add an extra param to filter by customers
-      coda.makeParameter({
-        type: coda.ParameterType.String,
-        name: "Subscribers",
-        description: "List of all subscribers",
-        optional: true,
-        
-      }),
-    ],
+    parameters: [],
 
-    execute: async function ([name,email,opened_rate,opened], context) {
-      let url = `${API_BASE_URL}subscribers?limit=1000`
+    execute: async function ([], context) {
+      const limit = 1000
+      let {prev_cursor, next_cursor} = context.sync.continuation ?? {}
+      let param = {limit}
+      if(prev_cursor || next_cursor) {param['cursor'] = prev_cursor || next_cursor}
+      let url = coda.withQueryParams(`${API_BASE_URL}subscribers`, param)
+      console.log(`url: ${url}`)
       let response = await context.fetcher.fetch({
         method: "GET",
         url: url,
       });
 
-      console.log(response)
-      let results = response.body;
-      console.log(results)
-
-      return {
-        result: results
+      let results = response.body.data;
+      console.log(`results count: ${results.length}`)
+      let meta = response.body.meta as Meta
+      for (let result of results){
+        result.firstName = result.fields?.name
+        result.lastName = result.fields?.last_name
+        result.opened_rate =  result.opened_rate/100
+        result.clicked_rate = result.clicked_rate/100
       }
 
+      let continuation
+      if(meta.next_cursor){
+        // There are more results. Go back and get them
+        continuation = {prev_cursor: meta.prev_cursor, 
+                        next_cursor: meta.next_cursor}
+        
+        console.log(`continuation = ${JSON.stringify(continuation, null, 2)}`)
+      }
+
+      return {
+        result: results,
+        continuation
+      }
 
       },
     },
   },
+
+
 );
 
 
-
+// Groups
 pack.addSyncTable({
   name: "Groups",
   schema: GroupsSchema,
@@ -125,18 +139,9 @@ pack.addSyncTable({
   formula: {
     name: "Groups",
     description: "A list of all groups",
-    parameters: [
-    
-      coda.makeParameter({
-        type: coda.ParameterType.String,
-        name: "Subscribers",
-        description: "List of all subscribers",
-        optional: true,
-        
-      }),
-    ],
+    parameters: [ ],
 
-    execute: async function ([name,id], context) {
+    execute: async function ([], context) {
       let url = `${API_BASE_URL}groups`
       let response = await context.fetcher.fetch({
         method: "GET",
