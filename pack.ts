@@ -4,6 +4,7 @@ import { SubscribersSchema } from "./schemas";
 import { GroupsSchema } from "./schemas";
 import { StatsSchema } from "./schemas";
 import { Meta } from "./types";
+import { getSubscribersForAllGroups } from "./helpers";
 
 export const pack = coda.newPack();
 
@@ -89,10 +90,11 @@ pack.addSyncTable({
     parameters: [],
 
     execute: async function ([], context) {
+      let subscriberGroups = await getSubscribersForAllGroups(context)
       const limit = 1000
       let {prev_cursor, next_cursor} = context.sync.continuation ?? {}
       let param = {limit}
-      if(prev_cursor || next_cursor) {param['cursor'] = prev_cursor || next_cursor}
+      if(next_cursor) {param['cursor'] = next_cursor}
       let url = coda.withQueryParams(`${API_BASE_URL}subscribers`, param)
       console.log(`url: ${url}`)
       let response = await context.fetcher.fetch({
@@ -110,6 +112,7 @@ pack.addSyncTable({
         result.lastName = result.fields?.last_name
         result.opened_rate =  result.opened_rate/100
         result.clicked_rate = result.clicked_rate/100
+        result.groups = subscriberGroups[result.id]
       }
 
       let continuation
@@ -180,8 +183,6 @@ pack.addSyncTable({
     }
     },
   },
-
-
 );
 
 
@@ -193,7 +194,7 @@ pack.addSyncTable({
   formula: {
     name: "Groups",
     description: "A list of all groups",
-    parameters: [ ],
+    parameters: [],
 
     execute: async function ([], context) {
       let url = `${API_BASE_URL}groups`
@@ -210,8 +211,7 @@ pack.addSyncTable({
         result.clickRate = result.click_rate.float
         result.clickRatePct = result.click_rate.string
       }
-      }
-      
+
       return {
         result: results
       }
@@ -316,6 +316,7 @@ pack.addFormula({
     return "Ok";
   },
 });
+
 //add subscriber to a group
 pack.addFormula({
   name: "AddSubscriberToGroup",
@@ -362,3 +363,18 @@ pack.addFormula({
     return "Ok";
   },
 });
+
+// For testing
+// pack.addFormula({
+//   name:"subscribersWithGroups",
+//   description: "testing Get subscribers",
+//   parameters:[],
+//   resultType: coda.ValueType.String,
+//   isAction:true,
+//   execute: async function ([], context) {
+//     let response = await getSubscribersForAllGroups(context)
+    
+//     return JSON.stringify(response);
+//   }
+// })
+

@@ -159,12 +159,15 @@ properties:{
         required: true,
         fromKey:"created_at"
       },
+
 },
 displayProperty: "name",
 idProperty: "id",
 featuredProperties:["name","id", "active", "createdAt"]
 })
 
+let GroupsReferenceSchema =
+    coda.makeReferenceSchemaFromObjectSchema(GroupsSchema, "Groups")
   
 export const SubscribersSchema = coda.makeObjectSchema({
 
@@ -284,11 +287,11 @@ export const SubscribersSchema = coda.makeObjectSchema({
         codaType: coda.ValueHintType.DateTime,
         fromKey:"updated_at"
       },
-      // groups:{
-      //   description:"Groups subscriber is in",
-      //   type: coda.ValueType.Array,
-      //   items: GroupsSchema,
-      // },
+      groups:{
+        description:"Groups subscriber is in",
+        type: coda.ValueType.Array,
+        items: GroupsReferenceSchema,
+      },
   
     },
     displayProperty: "email",
@@ -296,7 +299,6 @@ export const SubscribersSchema = coda.makeObjectSchema({
     featuredProperties: ["email","id","opened_rate","createdAt"]
     ,
   });
-
 
 export const StatsSchema = coda.makeObjectSchema({
   
