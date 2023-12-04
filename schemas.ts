@@ -1,63 +1,5 @@
 import * as coda from "@codahq/packs-sdk";
 
-// export const CampaignSchema = coda.makeObjectSchema({
-  
-//     properties: {
-//       name: {
-//         description: "Name",
-//         type: coda.ValueType.String,
-//         required: true,
-//       },
-//       date_send: {
-//         description: "date_send",
-//         type: coda.ValueType.String,
-//         required: true,
-//       },
-  
-//       subject: {
-//         description: "Subject",
-//         type: coda.ValueType.String,
-//       },
-  
-//       status: {
-//         description: "Status",
-//         type: coda.ValueType.String,
-      
-//       },
-  
-//       count: {
-//         description: "Count",
-//         type: coda.ValueType.Number
-//       },
-  
-//       rate: {
-//         description: "Open rate",
-//         type: coda.ValueType.Number,
-//         codaType: coda.ValueHintType.Percent,
-//       },
-  
-//       total_recipients: {
-//         description: "Total recipients",
-//         type: coda.ValueType.Number,
-//         required: true,
-  
-//       },
-  
-//       click_rate: {
-//         description: "Click rate",
-//         type: coda.ValueType.Number,
-//         codaType: coda.ValueHintType.Percent,
-//         required: true,
-  
-//       },
-  
-  
-//     },
-//     displayProperty: "name",
-//     idProperty: "name",
-//     featuredProperties: ["name","subject","date_send","status","rate"]
-//     ,
-//   });
 
 export const GroupsSchema = coda.makeObjectSchema({
     /** 
@@ -298,6 +240,65 @@ export const SubscribersSchema = coda.makeObjectSchema({
     featuredProperties: ["email","id","opened_rate","createdAt"]
     ,
   });
+
+// export const CampaignSchema = coda.makeObjectSchema({
+  
+//     properties: {
+//       name: {
+//         description: "Name",
+//         type: coda.ValueType.String,
+//         required: true,
+//       },
+//       date_send: {
+//         description: "date_send",
+//         type: coda.ValueType.String,
+//         required: true,
+//       },
+  
+//       subject: {
+//         description: "Subject",
+//         type: coda.ValueType.String,
+//       },
+  
+//       status: {
+//         description: "Status",
+//         type: coda.ValueType.String,
+      
+//       },
+  
+//       count: {
+//         description: "Count",
+//         type: coda.ValueType.Number
+//       },
+  
+//       rate: {
+//         description: "Open rate",
+//         type: coda.ValueType.Number,
+//         codaType: coda.ValueHintType.Percent,
+//       },
+  
+//       total_recipients: {
+//         description: "Total recipients",
+//         type: coda.ValueType.Number,
+//         required: true,
+  
+//       },
+  
+//       click_rate: {
+//         description: "Click rate",
+//         type: coda.ValueType.Number,
+//         codaType: coda.ValueHintType.Percent,
+//         required: true,
+  
+//       },
+  
+  
+//     },
+//     displayProperty: "name",
+//     idProperty: "name",
+//     featuredProperties: ["name","subject","date_send","status","rate"]
+//     ,
+//   });
 
 // export const StatsSchema = coda.makeObjectSchema({
   

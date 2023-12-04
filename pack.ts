@@ -12,72 +12,11 @@ pack.addNetworkDomain("connect.mailerlite.com");
 
 export const API_BASE_URL = "https://connect.mailerlite.com/api/"
 
-// pack.setUserAuthentication({
-//   type: coda.AuthenticationType.CustomHeaderToken,
-//   instructionsUrl: "https://developers.mailerlite.com/docs/authentication",
-//   headerName: 'X-MailerLite-ApiKey',
-// });
 pack.setUserAuthentication({
   type: coda.AuthenticationType.HeaderBearerToken,
   instructionsUrl: "https://developers.mailerlite.com/docs/authentication",
 })
 
-// //Campaigns
-// pack.addSyncTable({
-//   name: "Campaigns",
-//   schema: CampaignSchema,
-//   identityName: "Campaigns",
-//   formula: {
-//     name: "Campaigns",
-//     description: "A list of all campaigns",
-//     parameters: [
-//       //if I want to add an extra param to filter by customers
-//       coda.makeParameter({
-//         type: coda.ParameterType.String,
-//         name: "Partners",
-//         description: "List of all Partners",
-//         optional: true,
-        
-//       }),
-//     ],
-
-//     execute: async function ([name,subject,date_send,status,count,rate], context) {
-
-//       // let url = "https://api.mailerlite.com/api/v2/campaigns";
-//       let url = `${API_BASE_URL}campaigns`
-//       let response = await context.fetcher.fetch({
-//         method: "GET",
-//         url: url,
-//       });
-
-    
-//       let results = response.body;
-
-
-//       for (let result of results){
-//         //restructure the Json to match what I want in Coda
-//         result.count = result.opened.count
-//       };
-
-//       for (let result of results){
-//         //restructure the Json to match what I want in Coda
-//         result.rate = result.opened.rate/100
-//       };
-
-//       for (let result of results){
-//         //restructure the Json to match what I want in Coda
-//         result.click_rate = result.clicked.rate/100
-//       };
-
-//       return {
-//         result: results
-//       }
-
-
-//       },
-//     },
-//   },
-// );
 
 // Subscribers
 pack.addSyncTable({
@@ -243,6 +182,63 @@ pack.addSyncTable({
     },
   },
 );
+
+// //Campaigns
+// pack.addSyncTable({
+//   name: "Campaigns",
+//   schema: CampaignSchema,
+//   identityName: "Campaigns",
+//   formula: {
+//     name: "Campaigns",
+//     description: "A list of all campaigns",
+//     parameters: [
+//       //if I want to add an extra param to filter by customers
+//       coda.makeParameter({
+//         type: coda.ParameterType.String,
+//         name: "Partners",
+//         description: "List of all Partners",
+//         optional: true,
+        
+//       }),
+//     ],
+
+//     execute: async function ([name,subject,date_send,status,count,rate], context) {
+
+//       // let url = "https://api.mailerlite.com/api/v2/campaigns";
+//       let url = `${API_BASE_URL}campaigns`
+//       let response = await context.fetcher.fetch({
+//         method: "GET",
+//         url: url,
+//       });
+
+    
+//       let results = response.body;
+
+
+//       for (let result of results){
+//         //restructure the Json to match what I want in Coda
+//         result.count = result.opened.count
+//       };
+
+//       for (let result of results){
+//         //restructure the Json to match what I want in Coda
+//         result.rate = result.opened.rate/100
+//       };
+
+//       for (let result of results){
+//         //restructure the Json to match what I want in Coda
+//         result.click_rate = result.clicked.rate/100
+//       };
+
+//       return {
+//         result: results
+//       }
+
+
+//       },
+//     },
+//   },
+// );
 
 // //Stats_starts
 // pack.addSyncTable({
