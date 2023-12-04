@@ -185,7 +185,6 @@ pack.addSyncTable({
   },
 );
 
-
 // Groups
 pack.addSyncTable({
   name: "Groups",
@@ -244,7 +243,7 @@ pack.addSyncTable({
     },
   },
 );
-  
+
 //Stats_starts
 pack.addSyncTable({
   name: "Stats",
@@ -279,88 +278,281 @@ pack.addSyncTable({
 );
 //stats_end
 
+/** FORMULAS */
+// Add a new subscriber
 pack.addFormula({
   name: "AddSubscriber",
   description: "Add a new subscriber.",
   parameters: [
-    coda.makeParameter({
-      type: coda.ParameterType.String,
-      name: "name",
-      description: "Add a new subscriber.",
-    }),
     coda.makeParameter ({
       type: coda.ParameterType.String,
       name: "email",
       description: "the email",
       optional: false
-    })
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "firstName",
+      description: "First name for the subscriber.",
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "lastName",
+      description: "Last name for the subscriber.",
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.SparseStringArray,
+      name: "groups",
+      description: "Groups to add the scubscriber to"
+    }),
     
   ],
   resultType: coda.ValueType.String,
   isAction: true,
 
-  execute: async function ([name,email], context) {
-    let response = await context.fetcher.fetch({
-      // url: "https://api.mailerlite.com/api/v2/subscribers",
-      url: `${API_BASE_URL}subscribers`,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        "email": email,
-        "name": name,
-      }),
-    });
-    
-    return "Ok";
+  execute: async function ([email, firstName, lastName, groups], context) {
+    try{
+      let response = await context.fetcher.fetch({
+        url: `${API_BASE_URL}subscribers`,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          "fields": {
+            "name": firstName,
+            "last_name": lastName
+          },groups
+        }),
+      });
+      
+      let result = response.body.data 
+      console.log(result)
+
+      return result;
+    } catch(error){
+      // If the request failed because the server returned a 300+ status code.
+      console.log(error)
+      if (coda.StatusCodeError.isStatusCodeError(error)) {
+        // Cast the error as a StatusCodeError, for better intellisense.
+        let statusError = error as coda.StatusCodeError;
+        // If the API returned an error message in the body, show it to the user.
+        let message = statusError.body?.message;
+        if (message) {
+          message = JSON.stringify(statusError.body?.errors, null, 2)
+          throw new coda.UserVisibleError(message);
+        }
+      }
+      // The request failed for some other reason. Re-throw the error so that it
+      // bubbles up.
+      throw error;
+    }
   },
 });
 
-//add subscriber to a group
+//add an existing subscriber to a group
 pack.addFormula({
   name: "AddSubscriberToGroup",
   description: "Add a new subscriber to a specific group",
   parameters: [
     coda.makeParameter({
       type: coda.ParameterType.String,
-      name: "Group_ID",
-      description: "Group ID.",
-    
+      name: "groupId",
+      description: "The id of the group to add the subscriber to.",
     }),
     coda.makeParameter ({
       type: coda.ParameterType.String,
-      name: "email",
-      description: "the email",
+      name: "subscriberId",
+      description: "The id of the scubscriber to add to the group",
+    }),
+  ],
+  resultType: coda.ValueType.Number,
+  isAction: true,
+
+  execute: async function ( [groupId, subscriberId], context) {
+    try{
+      let response = await context.fetcher.fetch({
+        url: `${API_BASE_URL}subscribers/${subscriberId}/groups/${groupId}`,
+        method: "POST"
+      });
       
+      return response.status
+    } catch(error){
+      // If the request failed because the server returned a 300+ status code.
+      console.log(error)
+      
+      if (coda.StatusCodeError.isStatusCodeError(error)) {
+        // Cast the error as a StatusCodeError, for better intellisense.
+        let statusError = error as coda.StatusCodeError;
+        // If the API returned an error message in the body, show it to the user.
+        if(statusError.statusCode === 404){
+          throw new coda.UserVisibleError(`Either the Group Id [${groupId}] and/or the Subscriber Id [${subscriberId}] is not valid`)
+        }
+        let message = statusError.body?.message;
+        if (message) {
+          message = JSON.stringify(statusError.body?.errors, null, 2)
+          throw new coda.UserVisibleError(message);
+        }
+      }
+      // The request failed for some other reason. Re-throw the error so that it
+      // bubbles up.
+      throw error;
+    }
+  },
+});
+
+//remove a subscriber to a group
+pack.addFormula({
+  name: "RemoveSubscriberFromGroup",
+  description: "Remove a subscriber from a specific group",
+  parameters: [
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "groupId",
+      description: "The id of the group to remove the subscriber from.",
     }),
     coda.makeParameter ({
       type: coda.ParameterType.String,
-      name: "name",
-      description: "First name",
+      name: "subscriberId",
+      description: "The id of the scubscriber to remove from  the group",
+    }),
+  ],
+  resultType: coda.ValueType.Number,
+  isAction: true,
+
+  execute: async function ( [groupId, subscriberId], context) {
+    try{
+      let response = await context.fetcher.fetch({
+        url: `${API_BASE_URL}subscribers/${subscriberId}/groups/${groupId}`,
+        method: "DELETE"
+      });
       
-    })
+      return response.status
+    } catch(error){
+      // If the request failed because the server returned a 300+ status code.
+      console.log(error)
+      
+      if (coda.StatusCodeError.isStatusCodeError(error)) {
+        // Cast the error as a StatusCodeError, for better intellisense.
+        let statusError = error as coda.StatusCodeError;
+        // If the API returned an error message in the body, show it to the user.
+        if(statusError.statusCode === 404){
+          throw new coda.UserVisibleError(`Either the Group Id [${groupId}] and/or the Subscriber Id [${subscriberId}] is not valid`)
+        }
+        let message = statusError.body?.message;
+        if (message) {
+          message = JSON.stringify(statusError.body?.errors, null, 2)
+          throw new coda.UserVisibleError(message);
+        }
+      }
+      // The request failed for some other reason. Re-throw the error so that it
+      // bubbles up.
+      throw error;
+    }
+
+  },
+});
+
+// Delete a subscriber
+pack.addFormula({
+  name: "DeleteSubscriber",
+  description: "Delete a subscriber. Removes the subscriber from the account but keeps their info incase they re-subscribe.  Use ForgetSubscriber to remove and delete their info",
+  parameters: [
+    coda.makeParameter ({
+      type: coda.ParameterType.String,
+      name: "subscriberId",
+      description: "The Id of the scubscriber to delete",
+      optional: false
+    }),
     
   ],
   resultType: coda.ValueType.String,
   isAction: true,
 
-  execute: async function ([Group_ID,email,name], context) {
-      // console.log("https://api.mailerlite.com/api/v2/groups/"+Group_ID+"/subscribers")
+  execute: async function ([subscriberId], context) {
+    try{
       let response = await context.fetcher.fetch({
-      // url: "https://api.mailerlite.com/api/v2/groups/"+Group_ID+"/subscribers",
-      url: `${API_BASE_URL}groups/${Group_ID}/subscribers`,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        "email": email,
-        "name": name,
-      }),
-    });
+        url: `${API_BASE_URL}subscribers/${subscriberId}`,
+        method: "DELETE",
+      });
+      
+      let result = response.status === 204 ? "Ok" : "ok"  
+      console.log(result)
+
+      return result;
+    } catch(error){
+      // If the request failed because the server returned a 300+ status code.
+      console.log(error)
+      
+      if (coda.StatusCodeError.isStatusCodeError(error)) {
+        // Cast the error as a StatusCodeError, for better intellisense.
+        let statusError = error as coda.StatusCodeError;
+        // If the API returned an error message in the body, show it to the user.
+        if(statusError.statusCode === 404){
+          throw new coda.UserVisibleError(`The Subscriber Id [${subscriberId}] is not valid`)
+        }
+        let message = statusError.body?.message;
+        if (message) {
+          message = JSON.stringify(statusError.body?.errors, null, 2)
+          throw new coda.UserVisibleError(message);
+        }
+      }
+      // The request failed for some other reason. Re-throw the error so that it
+      // bubbles up.
+      throw error;
+    }
+  },
+});
+
+// Forget a subscriber
+pack.addFormula({
+  name: "ForgetSubscriber",
+  description: "Delete a subscriber in a GDPR-complaint manner. Removes the subscriber from the account and removes their info after 30 days",
+  parameters: [
+    coda.makeParameter ({
+      type: coda.ParameterType.String,
+      name: "subscriberId",
+      description: "The Id of the scubscriber to delete",
+      optional: false
+    }),
     
-    return "Ok";
+  ],
+  resultType: coda.ValueType.String,
+  isAction: true,
+
+  execute: async function ([subscriberId], context) {
+    try{
+      let response = await context.fetcher.fetch({
+        url: `${API_BASE_URL}subscribers/${subscriberId}/forget`,
+        method: "POST",
+      });
+      
+      console.log(response)
+      let result = response.body?.message
+
+      return result;
+    } catch(error){
+      // If the request failed because the server returned a 300+ status code.
+      console.log(error)
+      
+      if (coda.StatusCodeError.isStatusCodeError(error)) {
+        // Cast the error as a StatusCodeError, for better intellisense.
+        let statusError = error as coda.StatusCodeError;
+        // If the API returned an error message in the body, show it to the user.
+        if(statusError.statusCode === 404){
+          throw new coda.UserVisibleError(`The Subscriber Id [${subscriberId}] is not valid`)
+        }
+        let message = statusError.body?.message;
+        if (message) {
+          message = JSON.stringify(statusError.body?.errors, null, 2)
+          throw new coda.UserVisibleError(message);
+        }
+      }
+      // The request failed for some other reason. Re-throw the error so that it
+      // bubbles up.
+      throw error;
+    }
   },
 });
 
