@@ -1,8 +1,8 @@
 import * as coda from "@codahq/packs-sdk";
-import { CampaignSchema } from "./schemas";
+// import { CampaignSchema } from "./schemas";
 import { SubscribersSchema } from "./schemas";
 import { GroupsSchema } from "./schemas";
-import { StatsSchema } from "./schemas";
+// import { StatsSchema } from "./schemas";
 import { Meta } from "./types";
 import { getSubscribersForAllGroups } from "./helpers";
 
@@ -22,62 +22,62 @@ pack.setUserAuthentication({
   instructionsUrl: "https://developers.mailerlite.com/docs/authentication",
 })
 
-//Campaigns
-pack.addSyncTable({
-  name: "Campaigns",
-  schema: CampaignSchema,
-  identityName: "Campaigns",
-  formula: {
-    name: "Campaigns",
-    description: "A list of all campaigns",
-    parameters: [
-      //if I want to add an extra param to filter by customers
-      coda.makeParameter({
-        type: coda.ParameterType.String,
-        name: "Partners",
-        description: "List of all Partners",
-        optional: true,
+// //Campaigns
+// pack.addSyncTable({
+//   name: "Campaigns",
+//   schema: CampaignSchema,
+//   identityName: "Campaigns",
+//   formula: {
+//     name: "Campaigns",
+//     description: "A list of all campaigns",
+//     parameters: [
+//       //if I want to add an extra param to filter by customers
+//       coda.makeParameter({
+//         type: coda.ParameterType.String,
+//         name: "Partners",
+//         description: "List of all Partners",
+//         optional: true,
         
-      }),
-    ],
+//       }),
+//     ],
 
-    execute: async function ([name,subject,date_send,status,count,rate], context) {
+//     execute: async function ([name,subject,date_send,status,count,rate], context) {
 
-      // let url = "https://api.mailerlite.com/api/v2/campaigns";
-      let url = `${API_BASE_URL}campaigns`
-      let response = await context.fetcher.fetch({
-        method: "GET",
-        url: url,
-      });
+//       // let url = "https://api.mailerlite.com/api/v2/campaigns";
+//       let url = `${API_BASE_URL}campaigns`
+//       let response = await context.fetcher.fetch({
+//         method: "GET",
+//         url: url,
+//       });
 
     
-      let results = response.body;
+//       let results = response.body;
 
 
-      for (let result of results){
-        //restructure the Json to match what I want in Coda
-        result.count = result.opened.count
-      };
+//       for (let result of results){
+//         //restructure the Json to match what I want in Coda
+//         result.count = result.opened.count
+//       };
 
-      for (let result of results){
-        //restructure the Json to match what I want in Coda
-        result.rate = result.opened.rate/100
-      };
+//       for (let result of results){
+//         //restructure the Json to match what I want in Coda
+//         result.rate = result.opened.rate/100
+//       };
 
-      for (let result of results){
-        //restructure the Json to match what I want in Coda
-        result.click_rate = result.clicked.rate/100
-      };
+//       for (let result of results){
+//         //restructure the Json to match what I want in Coda
+//         result.click_rate = result.clicked.rate/100
+//       };
 
-      return {
-        result: results
-      }
+//       return {
+//         result: results
+//       }
 
 
-      },
-    },
-  },
-);
+//       },
+//     },
+//   },
+// );
 
 // Subscribers
 pack.addSyncTable({
@@ -244,39 +244,39 @@ pack.addSyncTable({
   },
 );
 
-//Stats_starts
-pack.addSyncTable({
-  name: "Stats",
-  schema: StatsSchema,
-  identityName: "Stats",
+// //Stats_starts
+// pack.addSyncTable({
+//   name: "Stats",
+//   schema: StatsSchema,
+//   identityName: "Stats",
 
-  formula: {
-    name: "Stats",
-    description: "A list of your account stats",
-    parameters: [
-      coda.makeParameter({
-        type: coda.ParameterType.Number,
-        name: "Stats",
-        description: "List of all subscribers",
-        optional: true,
+//   formula: {
+//     name: "Stats",
+//     description: "A list of your account stats",
+//     parameters: [
+//       coda.makeParameter({
+//         type: coda.ParameterType.Number,
+//         name: "Stats",
+//         description: "List of all subscribers",
+//         optional: true,
         
-      }),
-    ],
-    execute: async function ([stats], context) {
+//       }),
+//     ],
+//     execute: async function ([stats], context) {
 
-      // let url = "https://api.mailerlite.com/api/v2/stats";
-      let url = `${API_BASE_URL}stats`
-      let response = await context.fetcher.fetch({
-        method: "GET",
-        url: url,
-      });
-      let results = [response.body]
-      return {result: results}
-      },
-    },
-  },
-);
-//stats_end
+//       // let url = "https://api.mailerlite.com/api/v2/stats";
+//       let url = `${API_BASE_URL}stats`
+//       let response = await context.fetcher.fetch({
+//         method: "GET",
+//         url: url,
+//       });
+//       let results = [response.body]
+//       return {result: results}
+//       },
+//     },
+//   },
+// );
+// //stats_end
 
 /** FORMULAS */
 // Add a new subscriber

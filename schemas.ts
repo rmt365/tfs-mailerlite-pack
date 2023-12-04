@@ -1,65 +1,65 @@
 import * as coda from "@codahq/packs-sdk";
 
-export const CampaignSchema = coda.makeObjectSchema({
+// export const CampaignSchema = coda.makeObjectSchema({
   
-    properties: {
-      name: {
-        description: "Name",
-        type: coda.ValueType.String,
-        required: true,
-      },
-      date_send: {
-        description: "date_send",
-        type: coda.ValueType.String,
-        required: true,
-      },
+//     properties: {
+//       name: {
+//         description: "Name",
+//         type: coda.ValueType.String,
+//         required: true,
+//       },
+//       date_send: {
+//         description: "date_send",
+//         type: coda.ValueType.String,
+//         required: true,
+//       },
   
-      subject: {
-        description: "Subject",
-        type: coda.ValueType.String,
-      },
+//       subject: {
+//         description: "Subject",
+//         type: coda.ValueType.String,
+//       },
   
-      status: {
-        description: "Status",
-        type: coda.ValueType.String,
+//       status: {
+//         description: "Status",
+//         type: coda.ValueType.String,
       
-      },
+//       },
   
-      count: {
-        description: "Count",
-        type: coda.ValueType.Number
-      },
+//       count: {
+//         description: "Count",
+//         type: coda.ValueType.Number
+//       },
   
-      rate: {
-        description: "Open rate",
-        type: coda.ValueType.Number,
-        codaType: coda.ValueHintType.Percent,
-      },
+//       rate: {
+//         description: "Open rate",
+//         type: coda.ValueType.Number,
+//         codaType: coda.ValueHintType.Percent,
+//       },
   
-      total_recipients: {
-        description: "Total recipients",
-        type: coda.ValueType.Number,
-        required: true,
+//       total_recipients: {
+//         description: "Total recipients",
+//         type: coda.ValueType.Number,
+//         required: true,
   
-      },
+//       },
   
-      click_rate: {
-        description: "Click rate",
-        type: coda.ValueType.Number,
-        codaType: coda.ValueHintType.Percent,
-        required: true,
+//       click_rate: {
+//         description: "Click rate",
+//         type: coda.ValueType.Number,
+//         codaType: coda.ValueHintType.Percent,
+//         required: true,
   
-      },
+//       },
   
   
-    },
-    displayProperty: "name",
-    idProperty: "name",
-    featuredProperties: ["name","subject","date_send","status","rate"]
-    ,
-  });
+//     },
+//     displayProperty: "name",
+//     idProperty: "name",
+//     featuredProperties: ["name","subject","date_send","status","rate"]
+//     ,
+//   });
 
-  export const GroupsSchema = coda.makeObjectSchema({
+export const GroupsSchema = coda.makeObjectSchema({
     /** 
  * "id": "1",
   "name": "dummy group",
@@ -166,8 +166,7 @@ idProperty: "id",
 featuredProperties:["name","id", "active", "createdAt"]
 })
 
-let GroupsReferenceSchema =
-    coda.makeReferenceSchemaFromObjectSchema(GroupsSchema, "Groups")
+const GroupsReferenceSchema = coda.makeReferenceSchemaFromObjectSchema(GroupsSchema, "Groups")
   
 export const SubscribersSchema = coda.makeObjectSchema({
 
@@ -300,64 +299,64 @@ export const SubscribersSchema = coda.makeObjectSchema({
     ,
   });
 
-export const StatsSchema = coda.makeObjectSchema({
+// export const StatsSchema = coda.makeObjectSchema({
   
-    properties: {
-      subscribed: {
-        description: "Suscribed",
-        type: coda.ValueType.Number,
-        required: true,
-        fromKey: "subscribed"
-      },
-      unsubscribed: {
-        description: "Unsubscribed",
-        type: coda.ValueType.Number,
-        fromKey: "unsubscribed"
-      },
-      campaigns: {
-        description: "Campaigns",
-        type: coda.ValueType.Number,
-        required: true,
-        fromKey: "campaigns"
-      },
+//     properties: {
+//       subscribed: {
+//         description: "Suscribed",
+//         type: coda.ValueType.Number,
+//         required: true,
+//         fromKey: "subscribed"
+//       },
+//       unsubscribed: {
+//         description: "Unsubscribed",
+//         type: coda.ValueType.Number,
+//         fromKey: "unsubscribed"
+//       },
+//       campaigns: {
+//         description: "Campaigns",
+//         type: coda.ValueType.Number,
+//         required: true,
+//         fromKey: "campaigns"
+//       },
   
-      sent_emails: {
-        description: "Sent Emails",
-        type: coda.ValueType.Number,
-        fromKey: "sent_emails"
-      },
+//       sent_emails: {
+//         description: "Sent Emails",
+//         type: coda.ValueType.Number,
+//         fromKey: "sent_emails"
+//       },
   
-      open_rate: {
-        description: "Open Rate",
-        type: coda.ValueType.Number,
-        fromKey: "open_rate",
-        codaType: coda.ValueHintType.Percent,
+//       open_rate: {
+//         description: "Open Rate",
+//         type: coda.ValueType.Number,
+//         fromKey: "open_rate",
+//         codaType: coda.ValueHintType.Percent,
       
-      },
+//       },
   
-      click_rate: {
-        description: "Click Rate",
-        type: coda.ValueType.Number,
-        fromKey: "click_rate",
-        codaType: coda.ValueHintType.Percent,
+//       click_rate: {
+//         description: "Click Rate",
+//         type: coda.ValueType.Number,
+//         fromKey: "click_rate",
+//         codaType: coda.ValueHintType.Percent,
         
-      },
+//       },
   
-      bounce_rate: {
-        description: "Bounce Rate",
-        type: coda.ValueType.Number,
-        fromKey: "bounce_rate",
-        codaType: coda.ValueHintType.Percent,
+//       bounce_rate: {
+//         description: "Bounce Rate",
+//         type: coda.ValueType.Number,
+//         fromKey: "bounce_rate",
+//         codaType: coda.ValueHintType.Percent,
         
-      },
+//       },
   
   
-    },
-    displayProperty: "Subscribed",
-    idProperty: "Campaigns",
-    featuredProperties: ["Subscribed","Unsubscribed","Campaigns"]
+//     },
+//     displayProperty: "Subscribed",
+//     idProperty: "Campaigns",
+//     featuredProperties: ["Subscribed","Unsubscribed","Campaigns"]
     
-  });
+//   });
 
 /*
   const GroupsSchemaOLD = coda.makeObjectSchema({
