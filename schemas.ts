@@ -169,6 +169,11 @@ export const SubscribersSchema = coda.makeObjectSchema({
         type: coda.ValueType.String,
         mutable:true
       },
+      fromPartner:{
+        description: "The formal partner the scubscriber is associated with",
+        type: coda.ValueType.String,
+        mutable:true
+      },
       sent: {
         description: "sent",
         type: coda.ValueType.Number,
@@ -232,7 +237,7 @@ export const SubscribersSchema = coda.makeObjectSchema({
         description:"Groups subscriber is in",
         type: coda.ValueType.Array,
         items: GroupsReferenceSchema,
-      },
+      }
   
     },
     displayProperty: "email",

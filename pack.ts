@@ -49,6 +49,7 @@ pack.addSyncTable({
       for (let result of results){
         result.firstName = result.fields?.name
         result.lastName = result.fields?.last_name
+        result.fromPartner = result.fields?.from_partner
         result.opened_rate =  result.opened_rate/100
         result.clicked_rate = result.clicked_rate/100
         result.groups = subscriberGroups[result.id]
@@ -71,7 +72,7 @@ pack.addSyncTable({
       },
     executeUpdate:async function(args, updates, context){
       let update = updates[0];  // Only one row at a time, by default.
-      let {id, email, firstName, lastName}= update.newValue;
+      let {id, email, firstName, lastName, fromPartner}= update.newValue;
       /**email	string	
        * fields	object
        * groups	array
@@ -79,6 +80,7 @@ pack.addSyncTable({
       let fields = {}
       if( update.updatedFields.includes("firstName") || update.updatedFields.includes("name")){fields['name']=firstName}
       if( update.updatedFields.includes("lastName") || update.updatedFields.includes("last_name")){fields['last_name']=lastName}
+      if( update.updatedFields.includes("fromPartner") || update.updatedFields.includes("from_partner")){ fields["from_partner"]=fromPartner}
 
       console.log(fields)
 
@@ -97,6 +99,7 @@ pack.addSyncTable({
 
         result.firstName = result.fields?.name
         result.lastName = result.fields?.last_name
+        result.fromPartner = result.fields?.from_partner
         result.opened_rate =  result.opened_rate/100
         result.clicked_rate = result.clicked_rate/100
       
@@ -297,6 +300,11 @@ pack.addFormula({
       description: "Last name for the subscriber.",
     }),
     coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "fromPartner",
+      description: "The formal partner assocaited with the subscriber.",
+    }),
+    coda.makeParameter({
       type: coda.ParameterType.SparseStringArray,
       name: "groups",
       description: "Groups to add the scubscriber to"
@@ -306,7 +314,7 @@ pack.addFormula({
   resultType: coda.ValueType.String,
   isAction: true,
 
-  execute: async function ([email, firstName, lastName, groups], context) {
+  execute: async function ([email, firstName, lastName, fromPartner, groups], context) {
     try{
       let response = await context.fetcher.fetch({
         url: `${API_BASE_URL}subscribers`,
@@ -318,8 +326,10 @@ pack.addFormula({
           email,
           "fields": {
             "name": firstName,
-            "last_name": lastName
-          },groups
+            "last_name": lastName,
+            "from_partner": fromPartner
+          },
+          groups: groups ? groups : []
         }),
       });
       
