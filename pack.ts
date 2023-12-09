@@ -5,6 +5,7 @@ import { GroupsSchema } from "./schemas";
 // import { StatsSchema } from "./schemas";
 import { Meta } from "./types";
 import { getSubscribersForAllGroups } from "./helpers";
+import { resolveObjectURL } from "buffer";
 
 export const pack = coda.newPack();
 
@@ -50,6 +51,7 @@ pack.addSyncTable({
         result.firstName = result.fields?.name
         result.lastName = result.fields?.last_name
         result.fromPartner = result.fields?.from_partner
+        result.partyRowId = result.fields?.party_row_id
         result.opened_rate =  result.opened_rate/100
         result.clicked_rate = result.clicked_rate/100
         result.groups = subscriberGroups[result.id]
@@ -72,7 +74,7 @@ pack.addSyncTable({
       },
     executeUpdate:async function(args, updates, context){
       let update = updates[0];  // Only one row at a time, by default.
-      let {id, email, firstName, lastName, fromPartner}= update.newValue;
+      let {id, email, firstName, lastName, fromPartner, partyRowId}= update.newValue;
       /**email	string	
        * fields	object
        * groups	array
@@ -81,6 +83,7 @@ pack.addSyncTable({
       if( update.updatedFields.includes("firstName") || update.updatedFields.includes("name")){fields['name']=firstName}
       if( update.updatedFields.includes("lastName") || update.updatedFields.includes("last_name")){fields['last_name']=lastName}
       if( update.updatedFields.includes("fromPartner") || update.updatedFields.includes("from_partner")){ fields["from_partner"]=fromPartner}
+      if( update.updatedFields.includes("partyRowId") || update.updatedFields.includes("party_row_id")){ fields["party_row_id"]=partyRowId}
 
       console.log(fields)
 
@@ -100,6 +103,7 @@ pack.addSyncTable({
         result.firstName = result.fields?.name
         result.lastName = result.fields?.last_name
         result.fromPartner = result.fields?.from_partner
+        result.partyRowId = result.fields?.party_row_id
         result.opened_rate =  result.opened_rate/100
         result.clicked_rate = result.clicked_rate/100
       
@@ -309,12 +313,16 @@ pack.addFormula({
       name: "groups",
       description: "Groups to add the scubscriber to"
     }),
-    
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "partyRowId",
+      description: "The row id for the party"
+    }),
   ],
   resultType: coda.ValueType.String,
   isAction: true,
 
-  execute: async function ([email, firstName, lastName, fromPartner, groups], context) {
+  execute: async function ([email, firstName, lastName, fromPartner, groups, partyRowId], context) {
     try{
       let response = await context.fetcher.fetch({
         url: `${API_BASE_URL}subscribers`,
@@ -327,9 +335,10 @@ pack.addFormula({
           "fields": {
             "name": firstName,
             "last_name": lastName,
-            "from_partner": fromPartner
+            "from_partner": fromPartner,
+            "party_row_id":partyRowId
           },
-          groups: groups ? groups : []
+          groups: groups ? groups : [],
         }),
       });
       

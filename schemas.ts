@@ -112,36 +112,7 @@ const GroupsReferenceSchema = coda.makeReferenceSchemaFromObjectSchema(GroupsSch
   
 export const SubscribersSchema = coda.makeObjectSchema({
 
-  /** "id": "31986843064993537",
-      "email": "dummy@example.com",
-      "status": "active",
-      "source": "api",
-      "sent": 0,
-      "opens_count": 0,
-      "clicks_count": 0,
-      "open_rate": 0,
-      "click_rate": 0,
-      "ip_address": null,
-      "subscribed_at": "2021-09-01 14:03:50",
-      "unsubscribed_at": null,
-      "created_at": "2021-09-01 14:03:50",
-      "updated_at": "2021-09-01 14:03:50",
-      "fields": {
-        "city": null,
-        "company": null,
-        "country": null,
-        "last_name": "Testerson",
-        "name": "Dummy",
-        "phone": null,
-        "state": null,
-        "z_i_p": null
-      },
-      "groups": [],
-      "opted_in_at": null,
-      "optin_ip": null
-       */
-  
-    properties: {
+      properties: {
       id: {
         description: "Subscriber id",
         type: coda.ValueType.String,
@@ -171,6 +142,11 @@ export const SubscribersSchema = coda.makeObjectSchema({
       },
       fromPartner:{
         description: "The formal partner the scubscriber is associated with",
+        type: coda.ValueType.String,
+        mutable:true
+      },
+      partyRowId:{
+        description: "The row id for the party in the IMS associated with this subscriber",
         type: coda.ValueType.String,
         mutable:true
       },
@@ -242,7 +218,7 @@ export const SubscribersSchema = coda.makeObjectSchema({
     },
     displayProperty: "email",
     idProperty: "id",
-    featuredProperties: ["email","id","opened_rate","createdAt"]
+    featuredProperties: ["email","id","opened_rate","createdAt","partyRowId"]
     ,
   });
 
