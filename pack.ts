@@ -5,7 +5,7 @@ import { GroupsSchema } from "./schemas";
 // import { StatsSchema } from "./schemas";
 import { Meta } from "./types";
 import { getSubscribersForAllGroups } from "./helpers";
-import { resolveObjectURL } from "buffer";
+import { formatTimestamp } from "./helpers";
 
 export const pack = coda.newPack();
 
@@ -85,6 +85,7 @@ pack.addSyncTable({
       if( update.updatedFields.includes("fromPartner") || update.updatedFields.includes("from_partner")){ fields["from_partner"]=fromPartner}
       if( update.updatedFields.includes("partyRowId") || update.updatedFields.includes("party_row_id")){ fields["party_row_id"]=partyRowId}
 
+
       console.log(fields)
 
       try{
@@ -94,8 +95,7 @@ pack.addSyncTable({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({email, 
-                                fields}),
+          body: JSON.stringify({email, fields}),
         });
 
         let result = response.body.data;
@@ -340,6 +340,129 @@ pack.addFormula({
           },
           groups: groups ? groups : [],
         }),
+      });
+      
+      let result = response.body.data 
+      console.log(result)
+
+      return result;
+    } catch(error){
+      // If the request failed because the server returned a 300+ status code.
+      console.log(error)
+      if (coda.StatusCodeError.isStatusCodeError(error)) {
+        // Cast the error as a StatusCodeError, for better intellisense.
+        let statusError = error as coda.StatusCodeError;
+        // If the API returned an error message in the body, show it to the user.
+        let message = statusError.body?.message;
+        if (message) {
+          message = JSON.stringify(statusError.body?.errors, null, 2)
+          throw new coda.UserVisibleError(message);
+        }
+      }
+      // The request failed for some other reason. Re-throw the error so that it
+      // bubbles up.
+      throw error;
+    }
+  },
+});
+
+// Update an existing subscriber
+pack.addFormula({
+  name: "UpdateSubscriber",
+  description: "Update an existing subscriber.",
+  parameters: [
+    coda.makeParameter ({
+      type: coda.ParameterType.String,
+      name: "subscriberId",
+      description: "The id of the scubscriber to remove from  the group",
+      optional:false
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.StringArray,
+      name: "groups",
+      description: "An array of ids of groups the subscriber will belong to. The subscriber will be remvoed from any groups they are currently in that are not in the lizt.",
+      optional:true
+    }),
+    coda.makeParameter ({
+      type: coda.ParameterType.String,
+      name: "email",
+      description: "The email to update for the subscriber.  Thie can only be changed once a month for a given subscriber.",
+      optional: true
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "firstName",
+      description: "First name for the subscriber.",
+      optional: true,
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "lastName",
+      description: "Last name for the subscriber.",
+      optional: true,
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "fromPartner",
+      description: "The formal partner assocaited with the subscriber.",
+      optional: true,
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "partyRowId",
+      description: "The row id for the party",
+      optional: true
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.String,
+      name: "status",
+      description: "The status of the subscriber.",
+      autocomplete: ["active", "unsubscribed", "unconfirmed", "bounced", "junk"],
+      optional: true,
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.Date,
+      name: "unsubscribedDate",
+      description: "The date and time the subcriber unsubscribed. Must be specified when the status is unsubscribe",
+      optional: true
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.Date,
+      name: "subscribedDate",
+      description: "The date and time the subcriber subscribed. Used when the status is active",
+      optional: true
+    })
+  ],
+  resultType: coda.ValueType.String,
+  isAction: true,
+
+  execute: async function ([subscriberId, groups, email, firstName, lastName, fromPartner, partyRowId, status, unsubscribeDate, subscribeDate], context) {
+    try{
+      let body = {}
+      if(groups){ body["groups"] = groups }
+      if(email){body["email"]= email}
+      if(firstName || lastName || fromPartner || partyRowId){
+        let fields = {}
+        if(firstName) {fields["firstName"] = firstName}
+        if(lastName) {fields["lastName"] = lastName}
+        if(fromPartner) {fields["fromPartner"] = fromPartner}
+        if(partyRowId) {fields["partyRowId"] = partyRowId}
+        body["fields"] = fields
+      }
+      if(status){ 
+        body["status"] = status
+        if(status === "unsubscribed" && unsubscribeDate){ body["unsubscribed_at"] = formatTimestamp(unsubscribeDate)}
+        if(status === "active" && subscribeDate){ body["subscribed_at"] = formatTimestamp(subscribeDate)}
+      }
+      console.log(body)
+
+      let response = await context.fetcher.fetch({
+        url: `${API_BASE_URL}subscribers/${subscriberId}`,
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
       });
       
       let result = response.body.data 

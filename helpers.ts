@@ -55,3 +55,16 @@ async function getSubscribersForGroup( groupId: string, limit:number, context: c
   }
   return results
 }
+
+export function formatTimestamp(date) {
+  const pad = (num) => (num < 10 ? '0' + num : num);
+
+  let year = date.getFullYear();
+  let month = pad(date.getMonth() + 1);  // JavaScript months are 0-indexed.
+  let day = pad(date.getDate());
+  let hours = pad(date.getHours());
+  let minutes = pad(date.getMinutes());
+  let seconds = pad(date.getSeconds());
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
