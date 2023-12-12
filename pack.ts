@@ -1,11 +1,9 @@
 import * as coda from "@codahq/packs-sdk";
-// import { CampaignSchema } from "./schemas";
 import { SubscribersSchema } from "./schemas";
 import { GroupsSchema } from "./schemas";
-// import { StatsSchema } from "./schemas";
 import { Meta } from "./types";
-import { getSubscribersForAllGroups } from "./helpers";
-import { formatTimestamp } from "./helpers";
+import { getSubscribersForAllGroups, updateSubscriber } from "./helpers";
+
 
 export const pack = coda.newPack();
 
@@ -55,6 +53,19 @@ pack.addSyncTable({
         result.opened_rate =  result.opened_rate/100
         result.clicked_rate = result.clicked_rate/100
         result.groups = subscriberGroups[result.id]
+        result.newEmail = null
+        result.newFirstName = null
+        result.newLastName = null
+        result.newFromPartner = null
+        result.newGroups = null
+        result.newStatus = null
+        result.newSubscribeAt = null
+        result.newUnsubscribeAt = null
+
+        // result.newGroups = grps ? grps.map(grp => grp.id).join(",") : "" 
+        // result.newStatus = result.status
+        // result.new_subscribe_at = result.subscribed_at
+        // result.new_unsubscribe_at = result.unsubscribed_at
       }
 
       let continuation
@@ -74,31 +85,26 @@ pack.addSyncTable({
       },
     executeUpdate:async function(args, updates, context){
       let update = updates[0];  // Only one row at a time, by default.
-      let {id, email, firstName, lastName, fromPartner, partyRowId}= update.newValue;
-      /**email	string	
-       * fields	object
-       * groups	array
-      */
-      let fields = {}
-      if( update.updatedFields.includes("firstName") || update.updatedFields.includes("name")){fields['name']=firstName}
-      if( update.updatedFields.includes("lastName") || update.updatedFields.includes("last_name")){fields['last_name']=lastName}
-      if( update.updatedFields.includes("fromPartner") || update.updatedFields.includes("from_partner")){ fields["from_partner"]=fromPartner}
-      if( update.updatedFields.includes("partyRowId") || update.updatedFields.includes("party_row_id")){ fields["party_row_id"]=partyRowId}
+      let {id, newEmail, newFirstName, newLastName, newFromPartner, partyRowId, newGroups, newStatus, newUnsubscribedAt, newSubscribedAt}= update.newValue;
 
+      console.log(JSON.stringify(update, null, 2))
+      let params = []
+      params.push( update.updatedFields.includes("newGroups") ? newGroups : undefined)
+      params.push( update.updatedFields.includes("newEmail") ? newEmail : undefined)
+      params.push( update.updatedFields.includes("newFirstName")  ? newFirstName : undefined)
+      params.push( update.updatedFields.includes("newLastName") ? newLastName : undefined)
+      params.push( update.updatedFields.includes("newFromPartner") ? newFromPartner : undefined)
+      params.push( update.updatedFields.includes("partyRowId") ? partyRowId : undefined)
+      if( update.updatedFields.includes("newStatus") ){ 
+        params.push( newStatus )
+        params.push(update.updatedFields.includes("newUnsubscribedAt") ? newUnsubscribedAt : undefined) 
+        params.push(update.updatedFields.includes("newSubscribedAt") ? newSubscribedAt : undefined) 
+      }
 
-      console.log(fields)
+      console.log(params)
 
       try{
-        let response = await context.fetcher.fetch({
-          method: "PUT",
-          url: `${API_BASE_URL}subscribers/${id}`,
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({email, fields}),
-        });
-
-        let result = response.body.data;
+        let result = await updateSubscriber(context, id, ...params )
 
         result.firstName = result.fields?.name
         result.lastName = result.fields?.last_name
@@ -106,7 +112,15 @@ pack.addSyncTable({
         result.partyRowId = result.fields?.party_row_id
         result.opened_rate =  result.opened_rate/100
         result.clicked_rate = result.clicked_rate/100
-      
+        result.newEmail = null
+        result.newFirstName = null
+        result.newLastName = null
+        result.newFromPartner = null
+        result.newGroups = null
+        result.newStatus = null
+        result.newSubscribeAt = null
+        result.newUnsubscribeAt = null
+
         return{ result:[result]}
 
       } catch(error){
@@ -126,10 +140,9 @@ pack.addSyncTable({
           // bubbles up.
           throw error;
       }
-    }
     },
-  },
-);
+    },
+});
 
 // Groups
 pack.addSyncTable({
@@ -437,55 +450,7 @@ pack.addFormula({
   isAction: true,
 
   execute: async function ([subscriberId, groups, email, firstName, lastName, fromPartner, partyRowId, status, unsubscribeDate, subscribeDate], context) {
-    try{
-      let body = {}
-      if(groups){ body["groups"] = groups }
-      if(email){body["email"]= email}
-      if(firstName || lastName || fromPartner || partyRowId){
-        let fields = {}
-        if(firstName) {fields["firstName"] = firstName}
-        if(lastName) {fields["lastName"] = lastName}
-        if(fromPartner) {fields["fromPartner"] = fromPartner}
-        if(partyRowId) {fields["partyRowId"] = partyRowId}
-        body["fields"] = fields
-      }
-      if(status){ 
-        body["status"] = status
-        if(status === "unsubscribed" && unsubscribeDate){ body["unsubscribed_at"] = formatTimestamp(unsubscribeDate)}
-        if(status === "active" && subscribeDate){ body["subscribed_at"] = formatTimestamp(subscribeDate)}
-      }
-      console.log(body)
-
-      let response = await context.fetcher.fetch({
-        url: `${API_BASE_URL}subscribers/${subscriberId}`,
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-      
-      let result = response.body.data 
-      console.log(result)
-
-      return result;
-    } catch(error){
-      // If the request failed because the server returned a 300+ status code.
-      console.log(error)
-      if (coda.StatusCodeError.isStatusCodeError(error)) {
-        // Cast the error as a StatusCodeError, for better intellisense.
-        let statusError = error as coda.StatusCodeError;
-        // If the API returned an error message in the body, show it to the user.
-        let message = statusError.body?.message;
-        if (message) {
-          message = JSON.stringify(statusError.body?.errors, null, 2)
-          throw new coda.UserVisibleError(message);
-        }
-      }
-      // The request failed for some other reason. Re-throw the error so that it
-      // bubbles up.
-      throw error;
-    }
+    return updateSubscriber(context, subscriberId, groups, email, firstName, lastName, fromPartner, partyRowId, status, unsubscribeDate, subscribeDate);
   },
 });
 

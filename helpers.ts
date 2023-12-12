@@ -56,15 +56,62 @@ async function getSubscribersForGroup( groupId: string, limit:number, context: c
   return results
 }
 
-export function formatTimestamp(date) {
-  const pad = (num) => (num < 10 ? '0' + num : num);
+function formatTimestamp(date, timezone) {
+  let formatter = new Intl.DateTimeFormat("en", {
+    timeZone: timezone || "US/Eastern",
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric', 
+    hour12: false
+  });
 
-  let year = date.getFullYear();
-  let month = pad(date.getMonth() + 1);  // JavaScript months are 0-indexed.
-  let day = pad(date.getDate());
-  let hours = pad(date.getHours());
-  let minutes = pad(date.getMinutes());
-  let seconds = pad(date.getSeconds());
+  // Format the date into individual parts.
+  const parts = formatter.formatToParts(date).reduce((obj, part) => {
+    obj[part.type] = part.value;
+    return obj;
+  }, {});
+  console.log(parts)   
+  const format = "{year}-{month}-{day} {hour}:{minute}:{second}"
+  return format.replace(/\{(.*?)}/g, (x,g)=> parts[g]);
+}
 
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+export async function updateSubscriber(context: coda.ExecutionContext, subscriberId:string, groups?:string | string[], email?:string, firstName?:string, lastName?:string, fromPartner?:string, 
+                                 partyRowId?:string, status?:string, unsubscribeDate?:Date|string, subscribeDate?:Date|string) {
+  // try{
+    console.log(`subscriberId: ${subscriberId}, groups:${groups}, email:${email}, firstName:${firstName}, lastName:${lastName}, fromPartner:${fromPartner}, 
+    partyRowId:${partyRowId}, status:${status}, unsubscribeDate:${unsubscribeDate}, subscribeDate:${subscribeDate}`)
+    let body = {}
+    if(groups){ body["groups"] = Array.isArray(groups) ? groups : groups.split(',')  }
+    if(email){body["email"]= email}
+    if(firstName || lastName || fromPartner || partyRowId){
+      let fields = {}
+      if(firstName) {fields["name"] = firstName}
+      if(lastName) {fields["last_name"] = lastName}
+      if(fromPartner) {fields["from_partner"] = fromPartner}
+      if(partyRowId) {fields["party_row_id"] = partyRowId}
+      body["fields"] = fields
+    }
+    if(status){ 
+      body["status"] = status
+      if(status === "unsubscribed" && unsubscribeDate){ body["unsubscribed_at"] = unsubscribeDate instanceof Date ? formatTimestamp(unsubscribeDate, context.timezone) : unsubscribeDate}
+      if(status === "active" && subscribeDate){ body["subscribed_at"] = subscribeDate instanceof Date ? formatTimestamp(subscribeDate, context.timezone) : subscribeDate}
+    }
+    console.log(body)
+
+    let response = await context.fetcher.fetch({
+      url: `${API_BASE_URL}subscribers/${subscriberId}`,
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    
+    let result = response.body.data 
+    console.log(result)
+
+    return result;
 }

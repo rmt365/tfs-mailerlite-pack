@@ -122,8 +122,7 @@ export const SubscribersSchema = coda.makeObjectSchema({
         description: "Subscriber email address",
         type: coda.ValueType.String,
         required: true,
-        fromKey:"email",
-        mutable:true
+        fromKey:"email"
       },
       status:{
         description: "Subscriber status",
@@ -132,18 +131,15 @@ export const SubscribersSchema = coda.makeObjectSchema({
       },
       firstName:{
         description:"Subscriber's first name",
-        type: coda.ValueType.String,
-        mutable:true
+        type: coda.ValueType.String
       },
       lastName:{
-        description:"Subscriber's first name",
-        type: coda.ValueType.String,
-        mutable:true
+        description:"Subscriber's last name",
+        type: coda.ValueType.String
       },
       fromPartner:{
         description: "The formal partner the scubscriber is associated with",
-        type: coda.ValueType.String,
-        mutable:true
+        type: coda.ValueType.String
       },
       partyRowId:{
         description: "The row id for the party in the IMS associated with this subscriber",
@@ -213,7 +209,51 @@ export const SubscribersSchema = coda.makeObjectSchema({
         description:"Groups subscriber is in",
         type: coda.ValueType.Array,
         items: GroupsReferenceSchema,
-      }
+      },
+      // Updateable columns
+      newGroups:{
+        description:"List of groups to put the subscriber in",
+        type: coda.ValueType.String,
+        mutable:true
+      },
+      newStatus:{
+        description: "New status to set the subscirber to",
+        type: coda.ValueType.String,
+        mutable:true
+      },
+      newSubscribedAt: {
+        description: "Set the date the subscriber subscribed",
+        type: coda.ValueType.String,
+        codaType: coda.ValueHintType.DateTime,
+        mutable:true
+      },
+      newUnsubscribedAt: {
+        description: "Set the date the subscriber unsubscribed",
+        type: coda.ValueType.String,
+        codaType: coda.ValueHintType.DateTime,
+        mutable:true
+      },
+      newEmail: {
+        description: "Subscriber email address to update",
+        type: coda.ValueType.String,
+        mutable:true
+      },
+      newFirstName:{
+        description:"Subscriber's first name to update",
+        type: coda.ValueType.String,
+        mutable:true
+      },
+      newLastName:{
+        description:"Subscriber's last name to update",
+        type: coda.ValueType.String,
+        mutable:true
+      },
+      newFromPartner:{
+        description: "The formal partner the scubscriber is associated with to update",
+        type: coda.ValueType.String,
+        mutable:true
+      },
+
   
     },
     displayProperty: "email",
