@@ -3,6 +3,7 @@ import { SubscribersSchema } from "./schemas";
 import { GroupsSchema } from "./schemas";
 import { Meta } from "./types";
 import { getSubscribersForAllGroups, updateSubscriber } from "./helpers";
+import { resolveObjectURL } from "buffer";
 
 
 export const pack = coda.newPack();
@@ -49,6 +50,7 @@ pack.addSyncTable({
         result.firstName = result.fields?.name
         result.lastName = result.fields?.last_name
         result.fromPartner = result.fields?.from_partner
+        result.fiveMAAGuest = result.fields?.five_maa_guest === "yes"
         result.partyRowId = result.fields?.party_row_id
         result.opened_rate =  result.opened_rate/100
         result.clicked_rate = result.clicked_rate/100
@@ -61,6 +63,7 @@ pack.addSyncTable({
         result.newStatus = null
         result.newSubscribeAt = null
         result.newUnsubscribeAt = null
+        result.newFiveMAAGuest = null
 
         // result.newGroups = grps ? grps.map(grp => grp.id).join(",") : "" 
         // result.newStatus = result.status
@@ -85,7 +88,7 @@ pack.addSyncTable({
       },
     executeUpdate:async function(args, updates, context){
       let update = updates[0];  // Only one row at a time, by default.
-      let {id, newEmail, newFirstName, newLastName, newFromPartner, partyRowId, newGroups, newStatus, newUnsubscribedAt, newSubscribedAt}= update.newValue;
+      let {id, newEmail, newFirstName, newLastName, newFromPartner, partyRowId, newGroups, newStatus, newUnsubscribedAt, newSubscribedAt, newFiveMAAGuest}= update.newValue;
 
       console.log(JSON.stringify(update, null, 2))
       let params = []
@@ -95,6 +98,7 @@ pack.addSyncTable({
       params.push( update.updatedFields.includes("newLastName") ? newLastName : undefined)
       params.push( update.updatedFields.includes("newFromPartner") ? newFromPartner : undefined)
       params.push( update.updatedFields.includes("partyRowId") ? partyRowId : undefined)
+      params.push( update.updatedFields.includes("newFiveMAAGuest") ? newFiveMAAGuest : undefined)
       if( update.updatedFields.includes("newStatus") ){ 
         params.push( newStatus )
         params.push(update.updatedFields.includes("newUnsubscribedAt") ? newUnsubscribedAt : undefined) 
@@ -109,6 +113,7 @@ pack.addSyncTable({
         result.firstName = result.fields?.name
         result.lastName = result.fields?.last_name
         result.fromPartner = result.fields?.from_partner
+        result.fiveMAAGuest = result.fields?.five_maa_guest  === "yes"
         result.partyRowId = result.fields?.party_row_id
         result.opened_rate =  result.opened_rate/100
         result.clicked_rate = result.clicked_rate/100
@@ -120,6 +125,7 @@ pack.addSyncTable({
         result.newStatus = null
         result.newSubscribeAt = null
         result.newUnsubscribeAt = null
+        result.newFiveMAAGuest = null
 
         return{ result:[result]}
 
@@ -444,13 +450,20 @@ pack.addFormula({
       name: "subscribedDate",
       description: "The date and time the subcriber subscribed. Used when the status is active",
       optional: true
+    }),
+    coda.makeParameter({
+      type: coda.ParameterType.Boolean,
+      name: "fiveMAA",
+      description: "Flag if the subscriber was a guest on the 5MAA podcast",
+      autocomplete:["yes","no",""],
+      optional: true
     })
   ],
   resultType: coda.ValueType.String,
   isAction: true,
 
-  execute: async function ([subscriberId, groups, email, firstName, lastName, fromPartner, partyRowId, status, unsubscribeDate, subscribeDate], context) {
-    return updateSubscriber(context, subscriberId, groups, email, firstName, lastName, fromPartner, partyRowId, status, unsubscribeDate, subscribeDate);
+  execute: async function ([subscriberId, groups, email, firstName, lastName, fromPartner, partyRowId, status, unsubscribeDate, subscribeDate, fiveMAAGuest], context) {
+    return updateSubscriber(context, subscriberId, groups, email, firstName, lastName, fromPartner, partyRowId, fiveMAAGuest, status, unsubscribeDate, subscribeDate);
   },
 });
 

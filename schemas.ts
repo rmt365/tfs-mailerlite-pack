@@ -146,6 +146,11 @@ export const SubscribersSchema = coda.makeObjectSchema({
         type: coda.ValueType.String,
         mutable:true
       },
+      fiveMAAGuest:{
+        description: "Flag set to yes if the subscriber is a 5MAA guest",
+        type: coda.ValueType.Boolean,
+        codaType: coda.ValueHintType.Toggle
+      },
       sent: {
         description: "sent",
         type: coda.ValueType.Number,
@@ -252,6 +257,11 @@ export const SubscribersSchema = coda.makeObjectSchema({
         description: "The formal partner the scubscriber is associated with to update",
         type: coda.ValueType.String,
         mutable:true
+      },
+      newFiveMAAGuest:{
+        description: "Flag set to yes if the subscriber is a 5MAA guest",
+        type: coda.ValueType.Boolean,
+        mutable:true,
       },
 
   

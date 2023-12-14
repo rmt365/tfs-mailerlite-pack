@@ -79,19 +79,20 @@ function formatTimestamp(date, timezone) {
 }
 
 export async function updateSubscriber(context: coda.ExecutionContext, subscriberId:string, groups?:string | string[], email?:string, firstName?:string, lastName?:string, fromPartner?:string, 
-                                 partyRowId?:string, status?:string, unsubscribeDate?:Date|string, subscribeDate?:Date|string) {
+                                 partyRowId?:string, fiveMAAGuest?:boolean, status?:string, unsubscribeDate?:Date|string, subscribeDate?:Date|string) {
   // try{
     console.log(`subscriberId: ${subscriberId}, groups:${groups}, email:${email}, firstName:${firstName}, lastName:${lastName}, fromPartner:${fromPartner}, 
-    partyRowId:${partyRowId}, status:${status}, unsubscribeDate:${unsubscribeDate}, subscribeDate:${subscribeDate}`)
+    partyRowId:${partyRowId}, fiveMAAGuest:${fiveMAAGuest}, status:${status}, unsubscribeDate:${unsubscribeDate}, subscribeDate:${subscribeDate}`)
     let body = {}
     if(groups){ body["groups"] = Array.isArray(groups) ? groups : groups.split(',')  }
     if(email){body["email"]= email}
-    if(firstName || lastName || fromPartner || partyRowId){
+    if(firstName || lastName || fromPartner || partyRowId || (fiveMAAGuest !== undefined )){
       let fields = {}
       if(firstName) {fields["name"] = firstName}
       if(lastName) {fields["last_name"] = lastName}
       if(fromPartner) {fields["from_partner"] = fromPartner}
       if(partyRowId) {fields["party_row_id"] = partyRowId}
+      if(fiveMAAGuest !== undefined) {fields["five_maa_guest"] = (fiveMAAGuest ? "yes" : " ") }
       body["fields"] = fields
     }
     if(status){ 
